@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tyre Report for 6 Tippers</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 40px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f4f4f4; }
+    .green { background-color: #c8e6c9; }
+    .yellow { background-color: #fff9c4; }
+    .red { background-color: #ffcdd2; }
+  </style>
+</head>
+<body>
+  <h1>Tyre Report – 6 Tippers</h1>
+  <p>Today's KMR: <strong>34164</strong> | New Tyre Life: <strong>6500 km</strong></p>
+
+  <!-- TIPPER TABLE TEMPLATE -->
+  <!-- To be populated dynamically by script or server logic -->
+
+  <!-- Example structure -->
+  <script>
+    const tippers = {
+      "Tipper 52": {
+        tyres: {
+          L1: 47.74, R1: 36.26, L2: 17.00, R2: 16.91, L3: 22.43, R3: 21.09,
+          L4: 94.22, R4: 26.30, L5: 92.04, R5: 26.83
+        }
+      },
+      "Tipper 27": {
+        tyres: {
+          L1: 56.35, R1: 75.43, L2: 38.26, R2: 26.91, L3: 12.09, R3: 36.30,
+          L4: 11.43, R4: 9.22, L5: 22.13, R5: 42.35
+        }
+      },
+      "Tipper 97": {
+        tyres: {
+          L1: 79.78, R1: 78.13, L2: 27.00, R2: 23.48, L3: 31.57, R3: 25.78,
+          L4: 36.74, R4: 41.57, L5: 44.00, R5: 41.70
+        }
+      },
+      "Tipper 26": {
+        tyres: {
+          L1: 69.17, L21: 59.00, L22: 48.74, L31: 62.26, L32: 54.17,
+          R1: 66.52, R21: 24.30, R22: 50.09, R31: 55.13, R32: 73.22
+        }
+      },
+      "Tipper 80": {
+        tyres: {
+          L1: 33.17, L21: 34.13, L22: 46.61, L31: 24.22, L32: 26.09,
+          R1: 44.57, R24: 30.87, R22: 34.83, R31: 35.65, R32: 25.39
+        }
+      },
+      "Tipper 95": {
+        tyres: {
+          L1: 59.13, L21: 9.13, L22: 9.30, L31: 92.35, L32: 89.65,
+          R1: 55.87, R21: 56.30, R22: 50.82, R31: 80.83, R32: 43.04
+        }
+      }
+    };
+
+    const todayKMR = 34164;
+    const tyreLife = 6500;
+    const container = document.body;
+
+    for (const [tipper, data] of Object.entries(tippers)) {
+      const table = document.createElement('table');
+      const caption = document.createElement('h2');
+      caption.textContent = tipper;
+      container.appendChild(caption);
+
+      const headerRow = document.createElement('tr');
+      ['Position', 'Tread (%)', 'Fitting KMR', 'Running KM', 'Status'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+
+      const thead = document.createElement('thead');
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+
+      for (const [pos, tread] of Object.entries(data.tyres)) {
+        const tr = document.createElement('tr');
+        const fitKMR = Math.round(todayKMR - tyreLife * (tread / 100));
+        const running = todayKMR - fitKMR;
+
+        let statusClass = '';
+        let status = '';
+        if (tread >= 60) {
+          status = 'Green';
+          statusClass = 'green';
+        } else if (tread >= 40) {
+          status = 'Yellow';
+          statusClass = 'yellow';
+        } else {
+          status = 'Red';
+          statusClass = 'red';
+        }
+
+        tr.className = statusClass;
+        [pos, tread.toFixed(2) + '%', fitKMR, running, status].forEach(text => {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+  </script>
+</body>
+</html>
