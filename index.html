@@ -1,368 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Tyre Report for 6 Tippers</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f4f4f4; }
-    .green { background-color: #c8e6c9; }
-    .yellow { background-color: #fff9c4; }
-    .red { background-color: #ffcdd2; }
-    .dashboard { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
-    .chart-container { 
-      flex: 1; 
-      min-width: 300px; 
-      background: white; 
-      padding: 15px; 
-      border-radius: 8px; 
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .tipper-section { 
-      margin-bottom: 40px; 
-      background: #f9f9f9; 
-      padding: 15px; 
-      border-radius: 8px;
-    }
-    .summary-stats {
-      display: flex;
-      justify-content: space-around;
-      margin: 20px 0;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    .stat-card {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      min-width: 150px;
-      text-align: center;
-    }
-    .stat-value {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 5px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Production Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; color: #333; margin: 20px; }
+        h2 { background-color: #003366; color: white; padding: 10px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 8px 12px; border: 1px solid #ccc; text-align: left; }
+        th { background-color: #e6e6e6; }
+        .section { margin-bottom: 30px; }
+    </style>
 </head>
 <body>
-  <h1>Tyre Report – 6 Tippers</h1>
-  <p>Today's KMR: <strong>34164</strong> | New Tyre Life: <strong>6500 km</strong></p>
-
-  <div class="dashboard">
-    <div class="chart-container">
-      <h2>Overall Tyre Status</h2>
-      <canvas id="statusChart"></canvas>
+    <h2>Production Report Summary</h2>
+    <div class="section">
+        <h3>Opening Stock of Raw Material</h3>
+        <table>
+            <tr><th>Material</th><th>Quantity</th></tr>
+            <tr><td>Slurry</td><td>126.6 MT</td></tr>
+            <tr><td>RH</td><td>41 MT</td></tr>
+            <tr><td>OPC</td><td>25.9 MT</td></tr>
+            <tr><td>Silo Stock</td><td>3.5 MT</td></tr>
+            <tr><td>Microsilica Bags</td><td>2867 Nos</td></tr>
+        </table>
     </div>
-    <div class="chart-container">
-      <h2>Tread Distribution</h2>
-      <canvas id="treadChart"></canvas>
+
+    <div class="section">
+        <h3>Microsilica Dryer Production (AMS)</h3>
+        <table>
+            <tr><th>Session</th><th>Start Time</th><th>End Time</th><th>Production (MT)</th><th>Duration (hrs)</th><th>TPH</th><th>JCB Running</th></tr>
+            <tr><td>1st</td><td>9:40 AM</td><td>12:20 PM</td><td>12</td><td>2.5</td><td>5.5</td><td>2 hrs</td></tr>
+            <tr><td>2nd</td><td>4:10 PM</td><td>6:00 PM</td><td>10.6</td><td>1.9</td><td>5.5</td><td>2 hrs</td></tr>
+        </table>
     </div>
-  </div>
 
-  <div class="summary-stats" id="summaryStats">
-    <!-- Will be populated by JavaScript -->
-  </div>
+    <div class="section">
+        <h3>VRM Microsilica Production (AMS)</h3>
+        <table>
+            <tr><th>Session</th><th>Type</th><th>Start Time</th><th>End Time</th><th>Production (MT)</th><th>Bags</th><th>Duration (hrs)</th><th>TPH</th></tr>
+            <tr><td>1st</td><td>45µ</td><td>10:45 AM</td><td>11:40 AM</td><td>15.5</td><td>620</td><td>1.75</td><td>8.85</td></tr>
+            <tr><td>2nd</td><td>75µ</td><td>6:15 PM</td><td>7:00 PM</td><td>10.6</td><td>425</td><td>0.75</td><td>14.13</td></tr>
+        </table>
+        <p><strong>Total VRM Production:</strong> 26.2 MT in 2.5 hrs (TPH 10.48)</p>
+    </div>
 
-  <div id="tipperContainer"></div>
+    <div class="section">
+        <h3>Electricity Consumption</h3>
+        <table>
+            <tr><th>Meter</th><th>Start Reading</th><th>End Reading</th><th>Units Consumed</th></tr>
+            <tr><td>EB</td><td>67039</td><td>67255</td><td>864</td></tr>
+            <tr><td>New Smart Meter</td><td>67039</td><td>137</td><td>548</td></tr>
+        </table>
+        <p><strong>Total Consumption:</strong> 1412 Units</p>
+    </div>
 
-  <script>
-    const tippers = {
-      "Tipper 52": {
-        tyres: {
-          L1: 47.74, R1: 36.26, L2: 17.00, R2: 16.91, L3: 22.43, R3: 21.09,
-          L4: 94.22, R4: 26.30, L5: 92.04, R5: 26.83
-        }
-      },
-      "Tipper 27": {
-        tyres: {
-          L1: 56.35, R1: 75.43, L2: 38.26, R2: 26.91, L3: 12.09, R3: 36.30,
-          L4: 11.43, R4: 9.22, L5: 22.13, R5: 42.35
-        }
-      },
-      "Tipper 97": {
-        tyres: {
-          L1: 79.78, R1: 78.13, L2: 27.00, R2: 23.48, L3: 31.57, R3: 25.78,
-          L4: 36.74, R4: 41.57, L5: 44.00, R5: 41.70
-        }
-      },
-      "Tipper 26": {
-        tyres: {
-          L1: 69.17, L21: 59.00, L22: 48.74, L31: 62.26, L32: 54.17,
-          R1: 66.52, R21: 24.30, R22: 50.09, R31: 55.13, R32: 73.22
-        }
-      },
-      "Tipper 80": {
-        tyres: {
-          L1: 33.17, L21: 34.13, L22: 46.61, L31: 24.22, L32: 26.09,
-          R1: 44.57, R24: 30.87, R22: 34.83, R31: 35.65, R32: 25.39
-        }
-      },
-      "Tipper 95": {
-        tyres: {
-          L1: 59.13, L21: 9.13, L22: 9.30, L31: 92.35, L32: 89.65,
-          R1: 55.87, R21: 56.30, R22: 50.82, R31: 80.83, R32: 43.04
-        }
-      }
-    };
+    <div class="section">
+        <h3>Production, Dispatch & Stock</h3>
+        <table>
+            <tr><th>Item</th><th>Quantity</th></tr>
+            <tr><td>Microsilica Dispatch to Talegaon</td><td>44.89 MT</td></tr>
+            <tr><td>Total AMS Production</td><td>535 MT</td></tr>
+            <tr><td>Total AMS Dispatched</td><td>517 MT</td></tr>
+            <tr><td>Godown Stock for AMS</td><td>18 MT</td></tr>
+        </table>
+    </div>
 
-    const todayKMR = 34164;
-    const tyreLife = 6500;
-    const container = document.getElementById('tipperContainer');
-    const summaryStats = document.getElementById('summaryStats');
+    <div class="section">
+        <h3>Closing Stock of Raw Material</h3>
+        <table>
+            <tr><th>Material</th><th>Quantity</th></tr>
+            <tr><td>Slurry</td><td>112.6 MT</td></tr>
+            <tr><td>RH</td><td>59 MT</td></tr>
+            <tr><td>OPC</td><td>24.8 MT</td></tr>
+            <tr><td>Silo Stock</td><td>0 MT</td></tr>
+            <tr><td>Microsilica Bags</td><td>1819 Nos</td></tr>
+        </table>
+    </div>
 
-    // Statistics variables
-    let totalTyres = 0;
-    let greenCount = 0;
-    let yellowCount = 0;
-    let redCount = 0;
-    let treadValues = [];
-    let tipperNames = [];
-    let avgTreads = [];
+    <div class="section">
+        <h3>Power Failure & Break Down</h3>
+        <ul>
+            <li>10:00 AM - RH Vehicle Unloading Started</li>
+            <li>2:30 PM to 4:00 PM - Power Cut for New Meter Installation</li>
+        </ul>
+    </div>
 
-    // Process each tipper
-    for (const [tipper, data] of Object.entries(tippers)) {
-      const section = document.createElement('div');
-      section.className = 'tipper-section';
-      
-      const heading = document.createElement('h2');
-      heading.textContent = tipper;
-      section.appendChild(heading);
-
-      // Create chart container
-      const chartContainer = document.createElement('div');
-      chartContainer.className = 'chart-container';
-      chartContainer.style.height = '300px';
-      const chartCanvas = document.createElement('canvas');
-      chartCanvas.id = `chart-${tipper.replace(' ', '-')}`;
-      chartContainer.appendChild(chartCanvas);
-      section.appendChild(chartContainer);
-
-      // Create table
-      const table = document.createElement('table');
-      const headerRow = document.createElement('tr');
-      ['Position', 'Tread (%)', 'Fitting KMR', 'Running KM', 'Status'].forEach(text => {
-        const th = document.createElement('th');
-        th.textContent = text;
-        headerRow.appendChild(th);
-      });
-
-      const thead = document.createElement('thead');
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      let tipperTreadSum = 0;
-      let tipperTyreCount = 0;
-
-      for (const [pos, tread] of Object.entries(data.tyres)) {
-        totalTyres++;
-        tipperTreadSum += tread;
-        tipperTyreCount++;
-        treadValues.push(tread);
-
-        const running = Math.round(tyreLife * (1 - tread / 100));
-        const fitKMR = todayKMR - running;
-
-        let statusClass = '';
-        let status = '';
-        if (tread >= 60) {
-          status = 'Green';
-          statusClass = 'green';
-          greenCount++;
-        } else if (tread >= 30) {
-          status = 'Yellow';
-          statusClass = 'yellow';
-          yellowCount++;
-        } else {
-          status = 'Red';
-          statusClass = 'red';
-          redCount++;
-        }
-
-        const tr = document.createElement('tr');
-        tr.className = statusClass;
-        [pos, tread.toFixed(2) + '%', fitKMR, running, status].forEach(text => {
-          const td = document.createElement('td');
-          td.textContent = text;
-          tr.appendChild(td);
-        });
-
-        tbody.appendChild(tr);
-      }
-      
-      table.appendChild(tbody);
-      section.appendChild(table);
-      container.appendChild(section);
-
-      // Store data for tipper charts
-      tipperNames.push(tipper);
-      avgTreads.push((tipperTreadSum / tipperTyreCount).toFixed(2));
-
-      // Create individual tipper chart
-      setTimeout(() => {
-        createTipperChart(chartCanvas.id, tipper, data.tyres);
-      }, 100);
-    }
-
-    // Create summary statistics
-    const avgTread = (treadValues.reduce((a, b) => a + b, 0) / treadValues.length).toFixed(2);
-    
-    summaryStats.innerHTML = `
-      <div class="stat-card">
-        <div>Total Tyres</div>
-        <div class="stat-value">${totalTyres}</div>
-      </div>
-      <div class="stat-card">
-        <div>Avg. Tread</div>
-        <div class="stat-value">${avgTread}%</div>
-      </div>
-      <div class="stat-card" style="background-color: #c8e6c9;">
-        <div>Green Tyres</div>
-        <div class="stat-value">${greenCount}</div>
-      </div>
-      <div class="stat-card" style="background-color: #fff9c4;">
-        <div>Yellow Tyres</div>
-        <div class="stat-value">${yellowCount}</div>
-      </div>
-      <div class="stat-card" style="background-color: #ffcdd2;">
-        <div>Red Tyres</div>
-        <div class="stat-value">${redCount}</div>
-      </div>
-    `;
-
-    // Create charts after DOM is ready
-    document.addEventListener('DOMContentLoaded', function() {
-      createStatusChart();
-      createTreadChart();
-    });
-
-    function createStatusChart() {
-      const ctx = document.getElementById('statusChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: ['Green (≥60%)', 'Yellow (40-59%)', 'Red (<40%)'],
-          datasets: [{
-            data: [greenCount, yellowCount, redCount],
-            backgroundColor: ['#c8e6c9', '#fff9c4', '#ffcdd2'],
-            borderColor: ['#a5d6a7', '#fff59d', '#ef9a9a'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const value = context.raw;
-                  const percentage = Math.round((value / totalTyres) * 100);
-                  return `${context.label}: ${value} (${percentage}%)`;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function createTreadChart() {
-      const ctx = document.getElementById('treadChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: tipperNames,
-          datasets: [{
-            label: 'Average Tread (%)',
-            data: avgTreads,
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              title: {
-                display: true,
-                text: 'Tread Percentage'
-              }
-            }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return `Avg. Tread: ${context.raw}%`;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function createTipperChart(canvasId, tipperName, tyres) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      const positions = Object.keys(tyres);
-      const treads = Object.values(tyres);
-      
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: positions,
-          datasets: [{
-            label: 'Tread Percentage',
-            data: treads,
-            backgroundColor: treads.map(tread => 
-              tread >= 60 ? '#c8e6c9' : 
-              tread >= 40 ? '#fff9c4' : '#ffcdd2'
-            ),
-            borderColor: treads.map(tread => 
-              tread >= 60 ? '#a5d6a7' : 
-              tread >= 40 ? '#fff59d' : '#ef9a9a'
-            ),
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: `${tipperName} Tyre Tread Levels`
-            },
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return `${context.label}: ${context.raw}%`;
-                }
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              title: {
-                display: true,
-                text: 'Tread Percentage'
-              }
-            }
-          }
-        }
-      });
-    }
-  </script>
+    <div class="section">
+        <h3>Night Shift Production Plan</h3>
+        <ul>
+            <li>63 MT VRM Microsilica (AMS) Production</li>
+            <li>55 MT Dryer Microsilica (AMS) Drying Process</li>
+            <li><strong>Shift Incharge:</strong> Satya Ranjan</li>
+            <li><strong>Operators:</strong> Jagansoi & Shesananda</li>
+        </ul>
+    </div>
 </body>
 </html>
